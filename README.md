@@ -4,7 +4,7 @@ Your local AI workspace for a Windows laptop and a mobile Progressive Web App.
 
 **Developed by Solomon Gbeta · Powered by Multilancer LTD**
 
-[Website](https://localdesk.ng.cyou) · [Open mobile PWA](https://localdesk.ng.cyou/app/) · [Windows releases](https://github.com/solomongs/LocalDesk-AI/releases) · [Implementation checklist](CHECKLIST.md)
+[Website](https://localdesk.ng.cyou) · [Open mobile PWA](https://localdesk.ng.cyou/app/) · [GitHub website](https://solomongs.github.io/LocalDesk-AI/) · [Windows releases](https://github.com/solomongs/LocalDesk-AI/releases) · [Implementation checklist](CHECKLIST.md)
 
 ## What changed in 0.2
 
@@ -88,6 +88,7 @@ src-tauri/
 scripts/
   release-publish.mjs       authenticated signing and immutable release upload
   release-pages.mjs         static landing/about/install pages plus shared PWA
+  release-licenses.mjs      bundled dependency notices
 ```
 
 ## External coding agents
@@ -104,7 +105,7 @@ Use the System screen before downloading. WebGPU support, device memory and brow
 
 Local API access is opt-in and loopback-only. Tokens are not forwarded to Ollama. Browser Origin requests are rejected. Imported MCP servers can run with your account's privileges and must be trusted. Remote MCP servers require HTTPS; explicit local loopback HTTP is supported. OAuth-based MCP sign-in is not currently implemented.
 
-Release signing uses GitHub Actions OIDC with an exact-repository/workflow policy and a private key held outside this repository. Only the public updater key is committed. See [release operations](docs/RELEASING.md) and [architecture](docs/ARCHITECTURE.md).
+Release signing uses GitHub Actions OIDC with an exact-repository/workflow policy and a private key held outside this repository. Only the public updater key is committed. See [release operations](docs/RELEASING.md), [architecture](docs/ARCHITECTURE.md), and [the validation record](docs/VERIFICATION.md).
 
 ## About the developer
 
