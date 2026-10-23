@@ -92,7 +92,7 @@ const models=records.map(record=>{
  const [,,companySource]=publishers.find(([pattern])=>pattern.test(id))??[/./,'MLC community','https://huggingface.co/mlc-ai'];
  const company=(publishers.find(([pattern])=>pattern.test(id))??[])[1]??'MLC community';
  const quantization=id.match(/q\d+f\d+(?:_\d+)?/i)?.[0]??'See model card';
- const contextWindow=record.overrides?.context_window_size??(/-1k$/.test(id)?1024:4096);
+ const contextWindow=record.overrides?.context_window_size??(record.model_type===1?512:/-1k$/.test(id)?1024:4096);
  const suffix=/-1k$/.test(id)?' · 1K context':/-b\d+$/.test(id)?` · batch ${id.match(/-b(\d+)$/)[1]}`:'';
  const candidate=manifests[manifestUrl(record.model)];
  const known=Number.isSafeInteger(candidate?.weightBytes)&&candidate.weightBytes>0?candidate:undefined;
