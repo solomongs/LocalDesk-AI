@@ -43,5 +43,5 @@ Legend: [x] implemented/verified; [ ] pending. A checked build is not a physical
 - [x] Gate unsupported specialist models and known GPU limits before loading.
 - [x] Respect per-model context/recurrent settings and verify modern tensor-cache/MPK handling.
 - [x] Pass 30 core tests, TypeScript and production PWA build.
-- [ ] Publish and visually verify the expanded PWA.
-- [ ] Publish and verify the signed v0.2.1 update.
+- [x] Publish and visually verify the expanded PWA.
+- [x] Publish and verify the signed v0.2.1 update.

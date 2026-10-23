@@ -34,3 +34,7 @@ All 165 entries match the pinned WebLLM 0.2.86 catalog. The UI groups 68 familie
 106 variant sizes are derived from upstream tensor-cache weight manifests; the other 59 are explicitly estimates. Weights exclude tokenizer, runtime and other assets. Memory requirements use official WebLLM estimates, not free GPU memory measurements.
 
 30 core tests cover catalog coverage, GPU checks, RAM/storage separation, bounded cache discovery, shared-cache removal, 1K contexts, Mistral sliding-window and Qwen recurrent overrides, plus real WebLLM cache helpers for modern MPK shards. TypeScript and the production build pass.
+
+Live mobile-width checks passed at 390 pixels: full counts, Alibaba/Qwen + Coding + 2 GB RAM + 1 GB weight filter (4 families / 9 variants), exact variant search (1 / 1), empty search and reset, downloaded-only filter, browse-only embedding preview, and retained cache. SmolLM2 loaded from cache and produced a new local response. No console errors or horizontal overflow were observed.
+
+Version 0.2.1 completed Windows build and release in run `39923257307`, source `b353a3a98c3c3c6cc3082e1075f200f6b44f9b52`. All 30 frontend and 10 native tests passed in CI. The independently verified installer is 12,207,628 bytes, SHA-256 `14d5e373a689f196c500a4ed9c1f51a4036162438a048e2c8f443b0c5f654fa1`. Installer and trusted-comment signatures, exact signed version, manifest URL and every published asset digest passed; altered bytes were rejected. The main website download redirects to this verified v0.2.1 installer.
