@@ -4,7 +4,7 @@ Your local AI workspace for a Windows laptop and a mobile Progressive Web App.
 
 **Developed by Solomon Gbeta · Powered by Multilancer LTD**
 
-[Website](https://localdesk.ng.cyou) · [Open mobile PWA](https://localdesk.ng.cyou/app/) · [GitHub website](https://solomongs.github.io/LocalDesk-AI/) · [Windows releases](https://github.com/solomongs/LocalDesk-AI/releases) · [Implementation checklist](CHECKLIST.md)
+[Website](https://localdesk.ng.cyou) · [How it works](https://localdesk.ng.cyou/how-it-works) · [Open mobile PWA](https://localdesk.ng.cyou/app/) · [GitHub website](https://solomongs.github.io/LocalDesk-AI/) · [Windows releases](https://github.com/solomongs/LocalDesk-AI/releases) · [Implementation checklist](CHECKLIST.md)
 
 ## What changed in 0.2.1
 
@@ -88,7 +88,7 @@ src-tauri/
   pages.yml                GitHub-hosted website/PWA build and deployment
 scripts/
   release-publish.mjs       authenticated signing and immutable release upload
-  release-pages.mjs         static landing/about/install pages plus shared PWA
+  release-pages.mjs         static landing/about/install/how-it-works pages plus shared PWA
   release-licenses.mjs      bundled dependency notices
 ```
 
