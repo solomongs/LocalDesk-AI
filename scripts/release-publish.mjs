@@ -52,7 +52,7 @@ if(!oidcResponse.ok)throw new Error(`OIDC request failed: HTTP ${oidcResponse.st
 const {value:identity} = await oidcResponse.json();
 assert.ok(typeof identity === 'string' && identity.length > 50, 'Missing OIDC identity.');
 console.log(`::add-mask::${identity}`);
-const keyResponse = await fetch(broker,{method:'POST',headers:{Authorization:`Bearer ${identity}`,'Content-Type':'application/json'},body:'{}',redirect:'error'});
+const keyResponse = await fetch(broker,{method:'POST',headers:{Authorization:`Bearer ${identity}`,'Content-Type':'application/json','User-Agent':'LocalDeskReleasePublisher/1.0'},body:'{}',redirect:'error',signal:AbortSignal.timeout(30_000)});
 if(!keyResponse.ok)throw new Error(`Signing authorization failed: HTTP ${keyResponse.status}`);
 const credential = await keyResponse.json();
 assert.ok(typeof credential.key === 'string' && credential.key.length > 50, 'Signing broker returned no key.');

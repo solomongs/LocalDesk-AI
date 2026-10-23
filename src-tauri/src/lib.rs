@@ -27,8 +27,11 @@ async fn get_system_status(state: State<'_, AppState>) -> Result<system::SystemS
     system::snapshot(state.data_dir.clone(), state.resource_dir.clone()).await
 }
 #[tauri::command]
-async fn get_native_status(state: State<'_, AppState>, engine: Engine) -> NativeStatus {
-    native::status(&state, engine).await
+async fn get_native_status(
+    state: State<'_, AppState>,
+    engine: Engine,
+) -> Result<NativeStatus, String> {
+    Ok(native::status(&state, engine).await)
 }
 #[tauri::command]
 async fn native_list_models(
@@ -113,8 +116,8 @@ async fn get_fit_recommendations(
     system::fit_recommendations(state.resource_dir.as_deref(), use_case).await
 }
 #[tauri::command]
-async fn get_bridge_status(state: State<'_, AppState>) -> bridge::BridgeStatus {
-    state.bridge.status().await
+async fn get_bridge_status(state: State<'_, AppState>) -> Result<bridge::BridgeStatus, String> {
+    Ok(state.bridge.status().await)
 }
 #[tauri::command]
 async fn set_bridge_enabled(
