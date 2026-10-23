@@ -186,6 +186,9 @@ export class EngineController {
   async loadModel(model = this.state.selectedModel): Promise<void> {
     this.ensureIdle();
     if (!model) throw new Error('Choose an installed model first.');
+    if (this.state.currentEngine === 'webllm' && this.state.phase === 'ready' &&
+        this.state.loadedModel === model && this.state.selectedModel === model &&
+        this.browserEngine && !this.workerCrashed) return;
     if (model !== this.state.selectedModel) this.selectModel(model);
     if (this.state.currentEngine === 'native') {
       if (!this.state.nativeModels.some(item => item.id === model || item.name === model)) throw new Error('This model is not installed in the selected engine.');

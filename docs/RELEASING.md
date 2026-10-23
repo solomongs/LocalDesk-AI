@@ -6,7 +6,7 @@ LocalDesk AI uses one stable Tauri updater trust key. The public key is committe
 
 1. Change the version in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json` together.
 2. Run `npm ci`, `npm run typecheck`, `npm test`, `npm run build`, and `npm run release:check`.
-3. Commit to `main`. The release workflow tests and builds Windows x64 with current stable Rust. It bundles the pinned llmfit executable only after checking the published SHA-256.
+3. Commit to `main`. The release workflow tests and builds Windows x64 with current stable Rust. It bundles the pinned llmfit executable only after checking the published SHA-256, includes llmfit’s MIT license, and collects license/notice files from installed npm dependencies and locked Cargo packages into the installer’s `licenses/THIRD-PARTY-NOTICES.txt`.
 4. The unsigned installer is passed to a separate signing job. Dependencies are installed before that job requests its short-lived GitHub Actions OIDC identity.
 5. The signing broker verifies the fixed GitHub issuer and audience, immutable repository and owner IDs, `main` branch, release workflow path, permitted event, GitHub-hosted runner, token time, and replay policy. It then returns the existing updater key for this trusted job.
 6. The job supplies the key to the Tauri signer through its child-process environment. It never writes the private key to source, arguments, artifacts, or logs.

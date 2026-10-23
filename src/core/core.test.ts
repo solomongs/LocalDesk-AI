@@ -220,6 +220,12 @@ describe('mobile worker cleanup', () => {
     });
     return { engine, terminate };
   }
+  it('reuses the already loaded mobile model instead of allocating a second runtime', async () => {
+    const { engine, terminate } = fixture(async () => {});
+    await expect(engine.loadModel(MOBILE_MODELS[0].id)).resolves.toBeUndefined();
+    expect(engine.getState()).toMatchObject({ phase: 'ready', loadedModel: MOBILE_MODELS[0].id });
+    expect(terminate).not.toHaveBeenCalled();
+  });
   it('terminates a worker when cancelled during unresolved prefill', async () => {
     const create = vi.fn(() => new Promise(() => {}));
     const { engine, terminate } = fixture(create);
