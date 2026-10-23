@@ -1,6 +1,6 @@
 [package]
 name = "localdesk-ai"
-version = "0.2.0"
+version = "0.2.1"
 description = "LocalDesk AI — private local AI for desktop and mobile"
 authors = ["Solomon Gbeta"]
 edition = "2021"

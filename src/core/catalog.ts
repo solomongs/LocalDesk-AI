@@ -1,10 +1,27 @@
+import mobileCatalog from './mobile-models.generated.json';
+
 export interface ModelGuide {
   id: string;
   name: string;
   parameters: string;
   downloadGB: number;
   runtimeMemoryGB: number;
-  category: 'Everyday' | 'Writing' | 'Study' | 'Coding';
+  category: 'Everyday' | 'Writing' | 'Study' | 'Coding' | 'Reasoning' | 'Math' | 'Translation' | 'Embeddings' | 'Vision';
+  company?: string;
+  companySource?: string;
+  family?: string;
+  quantization?: string;
+  modelType?: 'chat' | 'vision' | 'embedding';
+  chatLoadable?: boolean;
+  downloadBytes?: number;
+  downloadSource?: 'manifest' | 'estimated';
+  downloadManifest?: string;
+  downloadNote?: string;
+  memorySource?: 'webllm';
+  contextWindow?: number;
+  requiredFeatures?: string[];
+  bufferSizeRequiredBytes?: number;
+  useCaseTags?: string[];
   summary: string;
   useCases: string[];
   limitations: string[];
@@ -16,8 +33,8 @@ export interface ModelGuide {
   source: string;
 }
 
-/** Curated MLC IDs from the official WebLLM prebuilt configuration. Sizes are estimates, not device guarantees. */
-export const MOBILE_MODELS: readonly ModelGuide[] = [
+/** Original small-model guides are also retained for the native Ollama catalog. */
+const STARTER_MODEL_GUIDES: readonly ModelGuide[] = [
   {
     id: 'SmolLM2-360M-Instruct-q4f32_1-MLC', name: 'SmolLM2 360M', parameters: '360 million',
     downloadGB: 0.23, runtimeMemoryGB: 0.58, category: 'Everyday', recommended: true,
@@ -60,8 +77,22 @@ export const MOBILE_MODELS: readonly ModelGuide[] = [
   },
 ] as const;
 
+/** Every prebuilt variant in the pinned WebLLM runtime; specialized types are listed but cannot be loaded into chat. */
+export const MOBILE_MODELS: readonly ModelGuide[] = (mobileCatalog.models as ModelGuide[]).map(model => {
+  const starter = STARTER_MODEL_GUIDES.find(guide => guide.id === model.id);
+  return starter ? { ...model, summary: starter.summary, useCases: starter.useCases, limitations: [...starter.limitations, ...model.limitations], examplePrompt: starter.examplePrompt, exampleResponse: starter.exampleResponse, recommended: starter.recommended, nativeId: starter.nativeId } : model;
+}).sort((a, b) => {
+  const ai = STARTER_MODEL_GUIDES.findIndex(model => model.id === a.id);
+  const bi = STARTER_MODEL_GUIDES.findIndex(model => model.id === b.id);
+  if (ai !== -1 || bi !== -1) return ai === -1 ? 1 : bi === -1 ? -1 : ai - bi;
+  return a.runtimeMemoryGB - b.runtimeMemoryGB || a.name.localeCompare(b.name);
+});
+
+export const MOBILE_CATALOG_VERSION = mobileCatalog.runtimeVersion;
+export const MOBILE_CATALOG_SOURCE = mobileCatalog.source;
+
 export const NATIVE_MODEL_GUIDES: readonly ModelGuide[] = [
-  ...MOBILE_MODELS,
+  ...STARTER_MODEL_GUIDES,
   {
     id: 'qwen2.5-coder:3b', nativeId: 'qwen2.5-coder:3b', name: 'Qwen2.5 Coder 3B', parameters: '3 billion',
     downloadGB: 1.9, runtimeMemoryGB: 3.1, category: 'Coding',
@@ -84,15 +115,15 @@ export const NATIVE_MODEL_GUIDES: readonly ModelGuide[] = [
   },
 ] as const;
 
-export const MODEL_SIZE_NOTE = 'Download sizes and working memory are approximate. Context length, runtime, device, and quantization change the actual requirements. Sample previews are illustrative, not a live response or a benchmark.';
+export const MODEL_SIZE_NOTE = 'Download sizes cover model weights; tokenizer, runtime and other assets need additional storage. Working-memory estimates are not measured free device RAM. Context length, runtime, device, and quantization change actual requirements. Sample previews are illustrative, not a live response or a benchmark.';
 export const LOCAL_LLM_EXPLANATION = 'LocalLLM is the name for local AI inside LocalDesk AI. On your phone, it uses the open-source WebLLM runtime to run a downloaded MLC model with WebGPU. On desktop, it connects to Ollama or llama.cpp on this computer. Your model generates answers locally; the first model download and optional remote MCP services still need internet.';
 
 export function getModelGuide(id: string): ModelGuide | undefined {
-  return NATIVE_MODEL_GUIDES.find(model => model.id === id || model.nativeId === id);
+  return MOBILE_MODELS.find(model => model.id === id) ?? NATIVE_MODEL_GUIDES.find(model => model.id === id || model.nativeId === id);
 }
 
 export function isCuratedMobileModel(id: string): boolean {
-  return MOBILE_MODELS.some(model => model.id === id);
+  return MOBILE_MODELS.some(model => model.id === id && model.chatLoadable !== false);
 }
 
 export function formatBytes(bytes: number | undefined): string {

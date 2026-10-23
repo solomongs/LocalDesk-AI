@@ -6,21 +6,22 @@ Your local AI workspace for a Windows laptop and a mobile Progressive Web App.
 
 [Website](https://localdesk.ng.cyou) · [Open mobile PWA](https://localdesk.ng.cyou/app/) · [GitHub website](https://solomongs.github.io/LocalDesk-AI/) · [Windows releases](https://github.com/solomongs/LocalDesk-AI/releases) · [Implementation checklist](CHECKLIST.md)
 
-## What changed in 0.2
+## What changed in 0.2.1
 
 This is a clean Tauri v2 + SQLite rebuild. The old Electron application and built-in code editor are not part of this source tree. Use your preferred editor or coding agent through LocalDesk's local OpenAI-compatible API or MCP endpoint instead.
 
 | Platform | Inference | Storage |
 | --- | --- | --- |
 | Desktop Tauri container | Native Ollama on 127.0.0.1:11434, or llama.cpp on 127.0.0.1:8080 | SQLite in the app data folder |
-| Mobile/browser PWA | Curated WebLLM MLC models on WebGPU | IndexedDB conversations and browser model cache |
+| Mobile/browser PWA | Compatible WebLLM MLC models on WebGPU | IndexedDB conversations and browser model cache |
 
 **LocalLLM** is our friendly name for on-device AI. The browser implementation uses the open-source [WebLLM](https://github.com/mlc-ai/web-llm) runtime; it is not a renamed upstream library or a claim of ownership. The first model download and optional remote tools need internet. A successfully loaded local model can then answer offline.
 
 ## Features
 
 - Familiar responsive chat interface, saved conversations, Markdown rendering, streaming and stop.
-- Model previews before downloading: use cases, download/memory estimates, limitations and labelled illustrative examples.
+- Complete bundled WebLLM catalog on mobile, grouped by model family with company, use-case, memory and download filters. All variants remain searchable; incompatible/specialist entries are clearly marked.
+- Model previews before downloading: use cases, weight-download sizes, working-memory estimates, limitations and labelled illustrative examples.
 - Ollama manager with installed models, real download progress, removal, startup help and official installation links.
 - Real [llmfit](https://github.com/AlexsJones/llmfit) recommendations on desktop; the Windows release bundles a checksum-verified binary. Fit/speed values are estimates.
 - Local authenticated OpenAI-compatible API and Streamable HTTP MCP server for external coding agents; disabled by default and bound only to 127.0.0.1.
@@ -96,6 +97,18 @@ scripts/
 Open **Connections** on desktop, enable local agent access and copy the displayed base URL, API key and installed model ID. Choose an OpenAI-compatible custom provider in your editor. Generic endpoint: `http://127.0.0.1:11435/v1`. MCP: `http://127.0.0.1:11435/mcp` with the same Bearer token.
 
 VS Code providers/extensions, Continue, OpenCode and TRAE have different configuration formats and model features. Connecting an API does not guarantee every agent feature, tool call or cloud-dependent editor feature will work offline. Model quality and tool-call support vary. There is no built-in code editor or arbitrary shell execution tool in LocalDesk's exported MCP server.
+
+## Mobile model catalog
+
+The mobile library lists all 165 prebuilt variants shipped by WebLLM 0.2.86, organized into 68 model families from 16 publishers. Search model names, variant IDs, companies and tasks; filter by company, use case, maximum working memory, maximum model download and already downloaded models. Group by company, use case, memory tier or family.
+
+159 text variants can be selected for chat when the device supports their GPU features. Two vision and four embedding variants remain visible with a browse-only explanation because this chat does not implement those specialized inputs/outputs. Model weights are separate from tokenizer/runtime storage. RAM values are WebLLM estimates, not a measurement of free phone memory.
+
+To refresh catalog metadata from the pinned runtime and upstream weight manifests:
+
+```bash
+npm run catalog:refresh
+```
 
 ## Mobile compatibility
 

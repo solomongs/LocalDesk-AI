@@ -1,6 +1,6 @@
 {
   "name": "localdesk-ai",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "LocalDesk AI by Solomon Gbeta. Tauri desktop and local mobile PWA.",
@@ -13,7 +13,8 @@
     "tauri": "tauri",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
-    "release:check": "node scripts/check-release.mjs"
+    "release:check": "node scripts/check-release.mjs",
+    "catalog:refresh": "node scripts/generate-mobile-catalog.mjs --refresh"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "0.2.86",

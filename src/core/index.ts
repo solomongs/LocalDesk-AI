@@ -3,6 +3,7 @@ export * from './environment';
 export * from './catalog';
 export * from './cache';
 export * from './budget';
+export * from './compatibility';
 export * from './engine';
 export * from './storage';
 export * from './native';

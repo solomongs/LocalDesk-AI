@@ -1,6 +1,7 @@
 import type { AppConfig, WebWorkerMLCEngine } from '@mlc-ai/web-llm';
-import { MOBILE_MODELS, isCuratedMobileModel } from './catalog';
-import { createMobileAppConfig, inspectMobileCache } from './cache';
+import { MOBILE_MODELS, isCuratedMobileModel, getModelGuide } from './catalog';
+import { createMobileAppConfig, inspectAllMobileCaches, inspectMobileCache } from './cache';
+import { getMobileContextWindow, getMobileModelCompatibility, getMobileReloadOptions } from './compatibility';
 import { prepareMobilePrompt } from './budget';
 import { checkBrowserSupport, detectEngine, requestPersistentStorage } from './environment';
 import { nativeTransport, type NativeChatChunk, type NativeTransport, type Unlisten } from './native';
@@ -138,10 +139,7 @@ export class EngineController {
     const epoch = this.loadEpoch;
     const webllm = await import('@mlc-ai/web-llm');
     const config = this.appConfig ?? createMobileAppConfig(webllm.prebuiltAppConfig);
-    const cached = await Promise.all(MOBILE_MODELS.map(async model => {
-      return (await inspectMobileCache(model.id, config, globalThis.caches, webllm.hasModelInCache)).complete ? model.id : null;
-    }));
-    const cachedModels = cached.filter((id): id is string => Boolean(id));
+    const cachedModels = await inspectAllMobileCaches(config, globalThis.caches, webllm.hasModelInCache);
     if (epoch !== this.loadEpoch) return this.state.cachedModels;
     this.update({ cachedModels });
     return cachedModels;
@@ -205,6 +203,10 @@ export class EngineController {
       if (abort.signal.aborted || epoch !== this.loadEpoch) throw abortError();
       this.update({ browserSupport: support });
       if (!support.supported) throw new Error(support.reason || 'WebGPU is unavailable.');
+      const guide = getModelGuide(model);
+      if (!guide) throw new Error('This model is not available in the mobile catalog.');
+      const compatibility = getMobileModelCompatibility(guide, support, { cached: this.state.cachedModels.includes(model) });
+      if (!compatibility.loadable) throw new Error(compatibility.reasons.join(' '));
       const engine = await this.ensureBrowserEngine(epoch);
       if (abort.signal.aborted || epoch !== this.loadEpoch) throw abortError();
       engine.setInitProgressCallback(report => {
@@ -219,7 +221,7 @@ export class EngineController {
         throw new Error('This model needs a larger GPU buffer than this browser provides. Choose a smaller model.');
       }
       const aborted = new Promise<never>((_resolve, reject) => abort.signal.addEventListener('abort', () => reject(abortError()), { once: true }));
-      await Promise.race([engine.reload(model, { context_window_size: 2048 }), aborted, this.workerFailure!]);
+      await Promise.race([engine.reload(model, getMobileReloadOptions(record ?? {}, guide)), aborted, this.workerFailure!]);
       if (abort.signal.aborted || epoch !== this.loadEpoch) throw abortError();
       await requestPersistentStorage();
       if (abort.signal.aborted || epoch !== this.loadEpoch) throw abortError();
@@ -275,7 +277,9 @@ export class EngineController {
     if (this.state.loadedModel === model) await this.unloadModel();
     const webllm = await import('@mlc-ai/web-llm');
     await webllm.deleteModelAllInfoInCache(model, this.appConfig ?? createMobileAppConfig(webllm.prebuiltAppConfig));
-    this.update({ cachedModels: this.state.cachedModels.filter(id => id !== model), statusText: 'Cached model removed from this browser.' });
+    // Some 1k/4k variants share model files or WASM. Recheck siblings as well.
+    await this.refreshCache();
+    this.update({ statusText: 'Cached model removed from this browser.' });
   }
 
   async complete(messages: ChatMessage[], options: CompletionOptions = {}): Promise<CompletionResult> {
@@ -284,7 +288,7 @@ export class EngineController {
     if (!this.state.selectedModel) throw new Error('Choose a model first.');
     if (this.state.currentEngine === 'webllm' && (!this.browserEngine || this.state.loadedModel !== this.state.selectedModel)) throw new Error('Download and load your selected model before chatting.');
     if (options.signal?.aborted) throw abortError();
-    const mobilePrompt = this.state.currentEngine === 'webllm' ? prepareMobilePrompt(messages, options.maxTokens) : null;
+    const mobilePrompt = this.state.currentEngine === 'webllm' ? prepareMobilePrompt(messages, options.maxTokens, getMobileContextWindow(getModelGuide(this.state.selectedModel))) : null;
     const requestMessages = mobilePrompt?.messages ?? messages;
     const abort = new AbortController();
     const forwardAbort = () => abort.abort();

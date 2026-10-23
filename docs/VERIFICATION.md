@@ -26,3 +26,11 @@ Windows CI checks the actual Tauri target. It does not establish driver compatib
 Imported MCP servers currently use a fresh session/process for each operation; servers requiring persistent per-session state or OAuth authentication may need additional integration. Hardware-fit rows are advisory; curated model guides supply the installation controls.
 
 Updater signatures authenticate release bytes. They are separate from Windows Authenticode publisher certificates; the installer is not claimed to have an Authenticode certificate.
+
+## v0.2.1 catalog expansion
+
+All 165 entries match the pinned WebLLM 0.2.86 catalog. The UI groups 68 families from 16 publishers. 159 text variants are selectable when compatible; 2 vision and 4 embedding variants are visible with an explanation of their unsupported input/output workflow.
+
+106 variant sizes are derived from upstream tensor-cache weight manifests; the other 59 are explicitly estimates. Weights exclude tokenizer, runtime and other assets. Memory requirements use official WebLLM estimates, not free GPU memory measurements.
+
+30 core tests cover catalog coverage, GPU checks, RAM/storage separation, bounded cache discovery, shared-cache removal, 1K contexts, Mistral sliding-window and Qwen recurrent overrides, plus real WebLLM cache helpers for modern MPK shards. TypeScript and the production build pass.

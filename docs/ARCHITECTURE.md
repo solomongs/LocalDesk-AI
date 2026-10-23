@@ -39,3 +39,9 @@ GitHub Actions builds Windows artifacts without a private updater key. A separat
 ## Verification limits
 
 Automated tests can validate state transitions, validation, storage, proxying and packaging. They cannot establish that every GPU, Windows driver or mobile browser can run a selected model. Record actual device tests separately in CHECKLIST.md and the release notes.
+
+## Mobile catalog
+
+`mobile-models.generated.json` records every variant from the pinned WebLLM runtime plus publisher/family/use-case metadata, official memory estimates and weight sizes. `scripts/generate-mobile-catalog.mjs` refreshes it from the runtime and weight manifests. `catalog.ts` retains the existing starter IDs and keeps native Ollama guides separate.
+
+`MobileModelLibrary` groups variants under family cards, filters by publisher/task/working memory/weight download, and progressively reveals results. The shared compatibility helper gates unsupported specialized model types, GPU features and single-buffer limits. RAM and storage estimates guide selection without pretending to measure free VRAM. The engine caps its context at the smaller of 2,048 and the selected variant’s supported context. Cache discovery only inspects existing candidates, with bounded concurrency.

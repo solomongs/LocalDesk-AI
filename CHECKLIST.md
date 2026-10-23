@@ -33,3 +33,15 @@ Legend: [x] implemented/verified; [ ] pending. A checked build is not a physical
 - [x] Record actual model/GPU tests and physical Windows/mobile limitations honestly in docs/VERIFICATION.md.
 - [ ] Fresh install and native Ollama inference on a physical Windows laptop.
 - [ ] Airplane-mode inference and home-screen installation on physical Android and iPhone/iPad devices.
+
+## v0.2.1 mobile catalog expansion
+- [x] List all 165 variants in the pinned WebLLM catalog (159 text, 2 vision, 4 embedding).
+- [x] Group 68 model families from 16 publishers with per-family variant choices.
+- [x] Search model names, IDs, publishers and use cases.
+- [x] Add working-memory, model-download and downloaded-only filters.
+- [x] Distinguish manifest-backed weight sizes from estimates and from runtime memory.
+- [x] Gate unsupported specialist models and known GPU limits before loading.
+- [x] Respect per-model context/recurrent settings and verify modern tensor-cache/MPK handling.
+- [x] Pass 30 core tests, TypeScript and production PWA build.
+- [ ] Publish and visually verify the expanded PWA.
+- [ ] Publish and verify the signed v0.2.1 update.

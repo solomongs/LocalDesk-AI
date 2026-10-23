@@ -19,7 +19,9 @@ function allowance(messages: readonly ChatMessage[]): number {
 }
 
 export function prepareMobilePrompt(messages: readonly ChatMessage[], requestedMaxTokens = 512, contextWindow = 2048): MobilePromptBudget {
-  const maxTokens = Number.isFinite(requestedMaxTokens) ? Math.min(512, Math.max(16, Math.floor(requestedMaxTokens))) : 512;
+  const context = Number.isFinite(contextWindow) && contextWindow > 0 ? Math.max(256, Math.floor(contextWindow)) : 2048;
+  const outputLimit = Math.min(512, Math.floor(context / 4));
+  const maxTokens = Number.isFinite(requestedMaxTokens) ? Math.min(outputLimit, Math.max(16, Math.floor(requestedMaxTokens))) : outputLimit;
   const systems = messages.filter(message => message.role === 'system');
   const turns: ChatMessage[][] = [];
   for (const message of messages) {
@@ -29,7 +31,7 @@ export function prepareMobilePrompt(messages: readonly ChatMessage[], requestedM
   }
   if (!turns.length) throw new Error('Write a message before asking LocalLLM for a response.');
   let selected = [...systems, ...turns[turns.length - 1]];
-  const inputLimit = contextWindow - maxTokens;
+  const inputLimit = context - maxTokens;
   if (allowance(selected) > inputLimit) {
     throw new Error('This message is too long for the mobile model’s context. Shorten it or split it into smaller questions, then try again.');
   }
