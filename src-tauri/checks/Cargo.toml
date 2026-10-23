@@ -1,0 +1,24 @@
+[package]
+name = "localdesk-backend-checks"
+version = "0.2.0"
+publish = false
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+rand = "0.8"
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "io-util", "time", "net", "sync"] }
+futures-util = "0.3"
+url = "2"
+tokio-util = { version = "0.7", features = ["rt"] }
+async-stream = "0.3"
+axum = { version = "0.8", features = ["json"] }
+sysinfo = "0.33"
+
+[dev-dependencies]
+tempfile = "3"
+
+tower = { version = "0.5", features = ["util"] }

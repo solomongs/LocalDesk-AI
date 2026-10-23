@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-capability",
+  "description": "LocalDesk desktop window. No shell, file-system or HTTP plugin capability is exposed.",
+  "windows": ["main"],
+  "permissions": ["core:default", "updater:default", "process:allow-restart", "opener:default"]
+}

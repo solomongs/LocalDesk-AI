@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LocalDesk AI",
+  "version": "0.2.0",
+  "identifier": "com.multilancer.localdesk",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "LocalDesk AI by Solomon",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 900,
+        "minHeight": 600,
+        "backgroundColor": "#101211"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' ipc: http://ipc.localhost https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "publisher": "Multilancer LTD",
+    "shortDescription": "Private local AI for your laptop",
+    "longDescription": "LocalDesk AI by Solomon Gbeta. Powered by Multilancer LTD. Offline chat, model management, and local coding-agent connections.",
+    "category": "Productivity",
+    "copyright": "Copyright \u00a9 2026 Solomon Gbeta / Multilancer LTD",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/solomongs/LocalDesk-AI/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU1QUQ1N0E2QzVEMkYxQjMKUldTejhkTEZwbGV0NVpIT2cvMXNrR2hNVWtrOGlzblpsakxxWWxzVEhyQXhtbEZhOHFOVlY3MWEK"
+    }
+  }
+}

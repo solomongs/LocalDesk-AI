@@ -1,0 +1,15 @@
+node_modules/
+dist/
+web-dist/
+src-tauri/target/
+src-tauri/binaries/*
+!src-tauri/binaries/.gitkeep
+.env*
+!.env.example
+*.key
+*.key.pub
+.DS_Store
+coverage/
+*.tsbuildinfo
+
+**/target/

@@ -1,0 +1,128 @@
+name: Build and release desktop
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'src-tauri/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'vite.config.ts'
+      - 'index.html'
+      - 'scripts/release*.mjs'
+      - 'scripts/check-release.mjs'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localdesk-release-main
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.repository == 'solomongs/LocalDesk-AI' && github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 50
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check release configuration
+        id: metadata
+        run: node scripts/check-release.mjs --github-output
+      - name: Typecheck and test shared application
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+      - name: Install stable Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Test native code
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Download and verify llmfit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'llmfit.zip'
+          $unpacked = Join-Path $env:RUNNER_TEMP 'llmfit'
+          Invoke-WebRequest 'https://github.com/AlexsJones/llmfit/releases/download/v1.1.17/llmfit-v1.1.17-x86_64-pc-windows-msvc.zip' -OutFile $archive
+          $expected = '661b6ea57d835f681fbabcf3366649ff681d0081267fd3a05db254e67af6073f'
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw 'llmfit checksum mismatch' }
+          Expand-Archive $archive -DestinationPath $unpacked
+          $executables = @(Get-ChildItem $unpacked -Recurse -File -Filter 'llmfit.exe')
+          if ($executables.Count -ne 1) { throw 'Expected one llmfit executable' }
+          New-Item -ItemType Directory -Path 'src-tauri/binaries' -Force | Out-Null
+          Copy-Item $executables[0].FullName 'src-tauri/binaries/llmfit.exe'
+      - name: Build unsigned Windows installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $override = Join-Path $env:RUNNER_TEMP 'tauri-release.json'
+          @{
+            bundle = @{
+              createUpdaterArtifacts = $false
+              resources = @{ 'binaries/llmfit.exe' = 'llmfit.exe' }
+            }
+          } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 $override
+          npm run tauri -- build --bundles nsis --config $override
+          if ($LASTEXITCODE -ne 0) { throw 'Tauri build failed' }
+          $installers = @(Get-ChildItem 'src-tauri/target/release/bundle/nsis' -File -Filter '*.exe')
+          if ($installers.Count -ne 1) { throw 'Expected one NSIS installer' }
+          New-Item -ItemType Directory -Path 'release' -Force | Out-Null
+          Copy-Item $installers[0].FullName "release/LocalDesk-AI-Setup-${{ steps.metadata.outputs.version }}-x64.exe"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-x64-installer
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: mobile-pwa
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      # Dependency installation runs before any signing credential is requested.
+      - name: Install the pinned signing CLI
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: windows-x64-installer
+          path: release/
+      - name: Sign and publish the verified release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOCALDESK_SIGNING_BROKER: https://localdesk.ng.cyou/api/signing-key
+        run: node scripts/release-publish.mjs release
